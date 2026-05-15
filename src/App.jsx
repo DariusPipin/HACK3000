@@ -4,6 +4,7 @@ import Screen2_Report from './screens/Screen2_Report'
 import Screen3_Pack from './screens/Screen3_Pack'
 import LoginScreen from './screens/LoginScreen'
 import SignupScreen from './screens/SignupScreen'
+import Screen_FreeTier from './screens/Screen_FreeTier'
 import LoadingAnimation from './components/LoadingAnimation'
 import { callClaude } from './api/claude'
 import { buildPrompt1 } from './prompts/prompt1_analyzer'
@@ -24,9 +25,9 @@ const ENTITY_PLATFORMS = [
 ]
 
 export default function App() {
-  const [screen, setScreen] = useState('login') // login | signup | landing | loading | report | pack
+  const [screen, setScreen] = useState('landing') // login | signup | landing | loading | report | pack | freetier
   const [session, setSession] = useState(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const [authLoading, setAuthLoading] = useState(false)
   const [authMessage, setAuthMessage] = useState(null)
   const [loadingStep, setLoadingStep] = useState(0)
   const [reportData, setReportData] = useState(null)
@@ -34,18 +35,11 @@ export default function App() {
   const [companyName, setCompanyName] = useState('')
   const [error, setError] = useState(null)
   const [selectedCountry, setSelectedCountry] = useState(null)
+  const [targetUrl, setTargetUrl] = useState('')
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session) setScreen('landing')
-      setAuthLoading(false)
-    })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      if (!session) setScreen('login')
-    })
-    return () => subscription.unsubscribe()
+    // Auth disabled for hackathon demo
+    setAuthLoading(false)
   }, [])
 
   const handleLogout = async () => {
@@ -196,7 +190,12 @@ export default function App() {
     setError(null)
   }
 
-  if (authLoading) return null
+  const runFreeAnalysis = (url) => {
+    setTargetUrl(url)
+    setScreen('freetier')
+  }
+
+  // if (authLoading) return null
 
   if (screen === 'signup') {
     return (
@@ -220,7 +219,7 @@ export default function App() {
   if (screen === 'landing') {
     return (
       <>
-        <Screen1_Landing onSubmit={runAnalysis} error={error} />
+        <Screen1_Landing onSubmit={runAnalysis} onRunFreeTier={runFreeAnalysis} error={error} />
         <LogoutOverlay session={session} onLogout={handleLogout} />
       </>
     )
@@ -256,6 +255,15 @@ export default function App() {
           companyName={companyName}
           onBack={() => setScreen('report')}
         />
+        <LogoutOverlay session={session} onLogout={handleLogout} />
+      </>
+    )
+  }
+
+  if (screen === 'freetier') {
+    return (
+      <>
+        <Screen_FreeTier url={targetUrl} onBack={() => setScreen('landing')} />
         <LogoutOverlay session={session} onLogout={handleLogout} />
       </>
     )
