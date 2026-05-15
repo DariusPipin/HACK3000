@@ -78,7 +78,7 @@ function BentoCard({ tag, title, sub, visual }) {
         <h3 style={{ fontFamily: "'DM Serif Display', serif", fontWeight: 400, fontSize: 32, lineHeight: 1.05, letterSpacing: '-0.005em', margin: '4px 0 0', color: '#f4efe6' }}>{title}</h3>
         <p style={{ fontSize: 15, lineHeight: 1.55, color: '#8a8378', margin: 0, maxWidth: 480, fontWeight: 400 }}>{sub}</p>
       </div>
-      <div style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', alignItems: 'flex-end', margin: '0 -10px -10px' }}>
+      <div style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', alignItems: 'flex-end', margin: '0 -10px -10px', minHeight: 0 }}>
         {visual}
       </div>
     </div>
@@ -200,8 +200,8 @@ function VisAIAnswer() {
 
 function VisGap() {
   return (
-    <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-      <div style={{ background: 'rgba(8,7,5,0.70)', border: '1px solid rgba(244,239,230,0.08)', borderRadius: 14, padding: 14, display: 'flex', flexDirection: 'column', gap: 10, filter: 'saturate(0.4) opacity(0.7)', boxShadow: '0 30px 60px -20px rgba(0,0,0,0.60)', minHeight: 200 }}>
+    <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, alignSelf: 'stretch' }}>
+      <div style={{ background: 'rgba(8,7,5,0.70)', border: '1px solid rgba(244,239,230,0.08)', borderRadius: 14, padding: 14, display: 'flex', flexDirection: 'column', gap: 10, filter: 'saturate(0.4) opacity(0.7)', boxShadow: '0 30px 60px -20px rgba(0,0,0,0.60)' }}>
         <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', color: '#544e46' }}>Before</span>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ fontSize: 11.5, color: '#f4efe6', fontWeight: 500, display: 'flex', gap: 6, alignItems: 'flex-start' }}>
@@ -216,7 +216,7 @@ function VisGap() {
           <span style={{ color: '#ffb6b9' }}>you</span>: not mentioned
         </div>
       </div>
-      <div style={{ background: 'rgba(8,7,5,0.70)', border: '1px solid rgba(244,239,230,0.08)', borderRadius: 14, padding: 14, display: 'flex', flexDirection: 'column', gap: 10, boxShadow: '0 30px 60px -20px rgba(0,0,0,0.60)', minHeight: 200 }}>
+      <div style={{ background: 'rgba(8,7,5,0.70)', border: '1px solid rgba(244,239,230,0.08)', borderRadius: 14, padding: 14, display: 'flex', flexDirection: 'column', gap: 10, boxShadow: '0 30px 60px -20px rgba(0,0,0,0.60)' }}>
         <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', color: '#ff2a32' }}>After</span>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ fontSize: 11.5, color: '#f4efe6', fontWeight: 500, display: 'flex', gap: 6, alignItems: 'flex-start' }}>
@@ -325,12 +325,11 @@ export default function Screen1_Landing({ onSubmit, error }) {
         borderBottom: scrolled ? '1px solid rgba(244,239,230,0.07)' : '1px solid transparent',
         transition: 'background 0.2s, border-color 0.2s',
       }}>
-        <button onClick={() => scrollTo('hero')} style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'DM Serif Display', serif", fontSize: 24, fontWeight: 400, letterSpacing: '0.005em', cursor: 'pointer', background: 'none', border: 0, color: '#f4efe6', padding: 0 }}>
-          <div style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0, background: 'radial-gradient(circle at 35% 30%, #ffd5d7 0%, #ff2a32 35%, #5a0f12 75%, #1a0408 100%)', boxShadow: '0 0 18px rgba(255,42,50,0.40), inset 0 0 6px rgba(255,255,255,0.15)' }} />
-          <span style={{ position: 'relative', top: 1 }}>Visibly</span>
+        <button onClick={() => scrollTo('hero')} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', background: 'none', border: 0, padding: 0 }}>
+          <img src="/logo.svg" alt="Visibly" style={{ height: 80, width: 'auto', display: 'block' }} />
         </button>
 
-        <div style={{ display: 'flex', gap: 30 }}>
+        <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 30 }}>
           {navLink('how', 'How it works')}
           {navLink('pricing', 'Pricing')}
         </div>
@@ -542,8 +541,8 @@ export default function Screen1_Landing({ onSubmit, error }) {
 
       {/* ── Footer ── */}
       <footer style={{ position: 'relative', zIndex: 5, maxWidth: 1440, margin: '0 auto', padding: '22px 36px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#544e46', fontSize: 12, letterSpacing: '0.02em', fontFamily: "'Geist Mono', monospace", textTransform: 'uppercase', borderTop: '1px solid rgba(244,239,230,0.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontFamily: "'DM Serif Display', serif", fontSize: 16, textTransform: 'none', color: '#8a8378', fontWeight: 400 }}>©</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <img src="/logo.svg" alt="Visibly" style={{ height: 80, width: 100, display: 'block', opacity: 0.5 }} />
           <span>2026 Visibly · All rights reserved</span>
         </div>
         <div style={{ display: 'flex', gap: 22 }}>

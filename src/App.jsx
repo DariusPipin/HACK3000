@@ -1,7 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Screen1_Landing from './screens/Screen1_Landing'
 import Screen2_Report from './screens/Screen2_Report'
 import Screen3_Pack from './screens/Screen3_Pack'
+import LoginScreen from './screens/LoginScreen'
+import SignupScreen from './screens/SignupScreen'
 import LoadingAnimation from './components/LoadingAnimation'
 import { callClaude } from './api/claude'
 import { buildPrompt1 } from './prompts/prompt1_analyzer'
@@ -10,6 +12,7 @@ import { buildPrompt3 } from './prompts/prompt3_gaps'
 import { buildPrompt4 } from './prompts/prompt4_content'
 import { parseJSON, parseContentPack } from './utils/parser'
 import { searchWeb, scoreWebResult } from './api/search'
+import { supabase } from './lib/supabase'
 
 const ENTITY_PLATFORMS = [
   { name: 'G2', domain: 'g2.com' },
@@ -21,13 +24,33 @@ const ENTITY_PLATFORMS = [
 ]
 
 export default function App() {
-  const [screen, setScreen] = useState('landing') // landing | loading | report | pack
+  const [screen, setScreen] = useState('login') // login | signup | landing | loading | report | pack
+  const [session, setSession] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
+  const [authMessage, setAuthMessage] = useState(null)
   const [loadingStep, setLoadingStep] = useState(0)
   const [reportData, setReportData] = useState(null)
   const [contentPack, setContentPack] = useState(null)
   const [companyName, setCompanyName] = useState('')
   const [error, setError] = useState(null)
   const [selectedCountry, setSelectedCountry] = useState(null)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      if (session) setScreen('landing')
+      setAuthLoading(false)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      if (!session) setScreen('login')
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+  }
 
   const runAnalysis = async (input, country = null) => {
     setScreen('loading')
@@ -173,33 +196,103 @@ export default function App() {
     setError(null)
   }
 
+  if (authLoading) return null
+
+  if (screen === 'signup') {
+    return (
+      <SignupScreen
+        onSuccess={(msg) => { setAuthMessage(msg); setScreen('login') }}
+        onGoToLogin={() => setScreen('login')}
+      />
+    )
+  }
+
+  if (screen === 'login') {
+    return (
+      <LoginScreen
+        message={authMessage}
+        onSuccess={() => { setAuthMessage(null); setScreen('landing') }}
+        onGoToSignup={() => setScreen('signup')}
+      />
+    )
+  }
+
   if (screen === 'landing') {
-    return <Screen1_Landing onSubmit={runAnalysis} error={error} />
+    return (
+      <>
+        <Screen1_Landing onSubmit={runAnalysis} error={error} />
+        <LogoutOverlay session={session} onLogout={handleLogout} />
+      </>
+    )
   }
 
   if (screen === 'loading') {
-    return <LoadingAnimation currentStep={loadingStep} country={selectedCountry} />
+    return (
+      <>
+        <LoadingAnimation currentStep={loadingStep} country={selectedCountry} />
+        <LogoutOverlay session={session} onLogout={handleLogout} />
+      </>
+    )
   }
 
   if (screen === 'report') {
     return (
-      <Screen2_Report
-        reportData={reportData}
-        onViewPack={() => setScreen('pack')}
-        onNewScan={resetToLanding}
-      />
+      <>
+        <Screen2_Report
+          reportData={reportData}
+          onViewPack={() => setScreen('pack')}
+          onNewScan={resetToLanding}
+        />
+        <LogoutOverlay session={session} onLogout={handleLogout} />
+      </>
     )
   }
 
   if (screen === 'pack') {
     return (
-      <Screen3_Pack
-        pack={contentPack}
-        companyName={companyName}
-        onBack={() => setScreen('report')}
-      />
+      <>
+        <Screen3_Pack
+          pack={contentPack}
+          companyName={companyName}
+          onBack={() => setScreen('report')}
+        />
+        <LogoutOverlay session={session} onLogout={handleLogout} />
+      </>
     )
   }
 
   return null
+}
+
+function LogoutOverlay({ session, onLogout }) {
+  if (!session) return null
+  return (
+    <div style={{
+      position: 'fixed', top: 20, right: 24, zIndex: 100,
+      display: 'flex', alignItems: 'center', gap: 10,
+    }}>
+      <span style={{
+        fontFamily: "'Geist Mono', monospace",
+        fontSize: 11,
+        color: '#544e46',
+      }}>
+        {session.user.email}
+      </span>
+      <button
+        onClick={onLogout}
+        style={{
+          padding: '6px 12px',
+          borderRadius: 999,
+          background: 'transparent',
+          border: '1px solid rgba(244,239,230,0.15)',
+          color: '#cdc6ba',
+          fontFamily: "'Geist Mono', monospace",
+          fontSize: 11,
+          cursor: 'pointer',
+        }}
+      >
+        Sign out
+      </button>
+    </div>
+  )
 }
