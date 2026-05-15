@@ -261,7 +261,7 @@ function VisContentPack() {
 
 // ── Main component ──
 
-export default function Screen1_Landing({ onSubmit, error }) {
+export default function Screen1_Landing({ onSubmit, error, onLogout }) {
   const [input, setInput] = useState('')
   const [country, setCountry] = useState('')
   const [focused, setFocused] = useState(false)
@@ -326,7 +326,7 @@ export default function Screen1_Landing({ onSubmit, error }) {
         transition: 'background 0.2s, border-color 0.2s',
       }}>
         <button onClick={() => scrollTo('hero')} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', background: 'none', border: 0, padding: 0 }}>
-          <img src="/logo.svg" alt="Visibly" style={{ height: 80, width: 'auto', display: 'block' }} />
+          <img src="/logo.svg" alt="Cited" style={{ height: 80, width: 'auto', display: 'block' }} />
         </button>
 
         <div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 30 }}>
@@ -335,7 +335,7 @@ export default function Screen1_Landing({ onSubmit, error }) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <button style={{ padding: '9px 14px', borderRadius: 999, color: '#cdc6ba', fontSize: 13.5, background: 'transparent', border: 0, cursor: 'default' }}>Sign in</button>
+          <button onClick={onLogout} style={{ padding: '9px 14px', borderRadius: 999, color: '#cdc6ba', fontSize: 13.5, background: 'transparent', border: 0, cursor: 'pointer' }}>Sign out</button>
           <button
             onClick={() => { scrollTo('hero'); setTimeout(() => document.querySelector('input[type="text"]')?.focus(), 400) }}
             style={{ padding: '9px 18px', borderRadius: 999, fontSize: 13.5, fontWeight: 500, background: '#f4efe6', color: '#15110d', border: 0, cursor: 'pointer', boxShadow: '0 1px 0 rgba(255,255,255,0.4) inset, 0 6px 24px rgba(244,239,230,0.06)', transition: 'transform 0.15s' }}
@@ -369,10 +369,12 @@ export default function Screen1_Landing({ onSubmit, error }) {
 
             {/* Headline */}
             <h1 style={{ fontFamily: "'DM Serif Display', serif", fontWeight: 400, fontSize: 'clamp(46px, 6.6vw, 96px)', lineHeight: 1.02, letterSpacing: '-0.01em', margin: 0, color: '#f4efe6' }}>
-              Your company speaks human.{' '}
+              Get &nbsp;
               <em style={{ fontStyle: 'italic', color: '#ff2a32', textShadow: '0 0 18px rgba(255,42,50,0.30)' }}>
-                AI speaks structured data.
+               recommended 
               </em>
+              &nbsp;
+               by AI.{' '}
             </h1>
 
             {/* Subhead */}
@@ -423,7 +425,7 @@ export default function Screen1_Landing({ onSubmit, error }) {
       {/* ── How it works ── */}
       <section id="how">
         <div style={{ maxWidth: 1180, margin: '0 auto', padding: '80px 36px 120px', position: 'relative' }}>
-          <Eyebrow>How Visibly works</Eyebrow>
+          <Eyebrow>How Cited works</Eyebrow>
           <h2 style={{ fontFamily: "'DM Serif Display', serif", fontWeight: 400, fontSize: 'clamp(40px, 5.6vw, 76px)', lineHeight: 1.04, letterSpacing: '-0.008em', margin: '0 0 22px', color: '#f4efe6', maxWidth: 840 }}>
             From invisible to <em style={{ fontStyle: 'italic', color: '#ff2a32', textShadow: '0 0 18px rgba(255,42,50,0.25)' }}>recommended by AI</em>.
           </h2>
@@ -542,8 +544,8 @@ export default function Screen1_Landing({ onSubmit, error }) {
       {/* ── Footer ── */}
       <footer style={{ position: 'relative', zIndex: 5, maxWidth: 1440, margin: '0 auto', padding: '22px 36px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#544e46', fontSize: 12, letterSpacing: '0.02em', fontFamily: "'Geist Mono', monospace", textTransform: 'uppercase', borderTop: '1px solid rgba(244,239,230,0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src="/logo.svg" alt="Visibly" style={{ height: 80, width: 100, display: 'block', opacity: 0.5 }} />
-          <span>2026 Visibly · All rights reserved</span>
+          <img src="/logo.svg" alt="Cited" style={{ height: 80, width: 100, display: 'block', opacity: 0.5 }} />
+          <span>2026 Cited · All rights reserved</span>
         </div>
         <div style={{ display: 'flex', gap: 22 }}>
           {[['how', 'How it works'], ['pricing', 'Pricing']].map(([id, label]) => (

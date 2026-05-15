@@ -218,81 +218,32 @@ export default function App() {
   }
 
   if (screen === 'landing') {
-    return (
-      <>
-        <Screen1_Landing onSubmit={runAnalysis} error={error} />
-        <LogoutOverlay session={session} onLogout={handleLogout} />
-      </>
-    )
+    return <Screen1_Landing onSubmit={runAnalysis} error={error} onLogout={handleLogout} />
   }
 
   if (screen === 'loading') {
-    return (
-      <>
-        <LoadingAnimation currentStep={loadingStep} country={selectedCountry} />
-        <LogoutOverlay session={session} onLogout={handleLogout} />
-      </>
-    )
+    return <LoadingAnimation currentStep={loadingStep} country={selectedCountry} />
   }
 
   if (screen === 'report') {
     return (
-      <>
-        <Screen2_Report
-          reportData={reportData}
-          onViewPack={() => setScreen('pack')}
-          onNewScan={resetToLanding}
-        />
-        <LogoutOverlay session={session} onLogout={handleLogout} />
-      </>
+      <Screen2_Report
+        reportData={reportData}
+        onViewPack={() => setScreen('pack')}
+        onNewScan={resetToLanding}
+      />
     )
   }
 
   if (screen === 'pack') {
     return (
-      <>
-        <Screen3_Pack
-          pack={contentPack}
-          companyName={companyName}
-          onBack={() => setScreen('report')}
-        />
-        <LogoutOverlay session={session} onLogout={handleLogout} />
-      </>
+      <Screen3_Pack
+        pack={contentPack}
+        companyName={companyName}
+        onBack={() => setScreen('report')}
+      />
     )
   }
 
   return null
-}
-
-function LogoutOverlay({ session, onLogout }) {
-  if (!session) return null
-  return (
-    <div style={{
-      position: 'fixed', top: 20, right: 24, zIndex: 100,
-      display: 'flex', alignItems: 'center', gap: 10,
-    }}>
-      <span style={{
-        fontFamily: "'Geist Mono', monospace",
-        fontSize: 11,
-        color: '#544e46',
-      }}>
-        {session.user.email}
-      </span>
-      <button
-        onClick={onLogout}
-        style={{
-          padding: '6px 12px',
-          borderRadius: 999,
-          background: 'transparent',
-          border: '1px solid rgba(244,239,230,0.15)',
-          color: '#cdc6ba',
-          fontFamily: "'Geist Mono', monospace",
-          fontSize: 11,
-          cursor: 'pointer',
-        }}
-      >
-        Sign out
-      </button>
-    </div>
-  )
 }

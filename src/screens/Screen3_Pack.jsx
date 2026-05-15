@@ -119,7 +119,7 @@ export default function Screen3_Pack({ pack, companyName, onBack }) {
             background: 'radial-gradient(circle at 35% 30%, #ffd5d7 0%, #ff2a32 35%, #5a0f12 75%, #1a0408 100%)',
             boxShadow: '0 0 14px rgba(255,42,50,0.40)',
           }} />
-          Visibly
+          Cited
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <span style={{

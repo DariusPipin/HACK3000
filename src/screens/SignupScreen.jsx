@@ -61,7 +61,7 @@ export default function SignupScreen({ onSuccess, onGoToLogin }) {
             letterSpacing: '-0.02em',
             marginBottom: 6,
           }}>
-            Visibly
+            Cited
           </div>
           <div style={{
             fontFamily: "'Geist Mono', monospace",
