@@ -50,7 +50,6 @@ export function parseContentPack(text) {
     entity_sheet:        extractSection(text, 'ENTITY_SHEET', 'FACT_SHEET'),
     fact_sheet:          extractSection(text, 'FACT_SHEET', 'JSON_LD'),
     json_ld:             extractSection(text, 'JSON_LD', 'FAQ_BLOCK'),
-    faq_block:           extractSection(text, 'FAQ_BLOCK', 'COMPARISON_OUTREACH'),
-    comparison_outreach: extractSection(text, 'COMPARISON_OUTREACH', null),
+    faq_block:           extractSection(text, 'FAQ_BLOCK', null),
   }
 }

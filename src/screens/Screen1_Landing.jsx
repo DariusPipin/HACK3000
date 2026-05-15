@@ -261,7 +261,7 @@ function VisContentPack() {
 
 // ── Main component ──
 
-export default function Screen1_Landing({ onSubmit, onRunFreeTier, error, onLogout }) {
+export default function Screen1_Landing({ onSubmit, error, onLogout, session, onGoToLogin }) {
   const [input, setInput] = useState('')
   const [country, setCountry] = useState('')
   const [focused, setFocused] = useState(false)
@@ -335,7 +335,10 @@ export default function Screen1_Landing({ onSubmit, onRunFreeTier, error, onLogo
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <button onClick={onLogout} style={{ padding: '9px 14px', borderRadius: 999, color: '#cdc6ba', fontSize: 13.5, background: 'transparent', border: 0, cursor: 'pointer' }}>Sign out</button>
+          {session
+            ? <button onClick={onLogout} style={{ padding: '9px 14px', borderRadius: 999, color: '#cdc6ba', fontSize: 13.5, background: 'transparent', border: 0, cursor: 'pointer' }}>Sign out</button>
+            : <button onClick={onGoToLogin} style={{ padding: '9px 14px', borderRadius: 999, color: '#cdc6ba', fontSize: 13.5, background: 'transparent', border: 0, cursor: 'pointer' }}>Sign in</button>
+          }
           <button
             onClick={() => { scrollTo('hero'); setTimeout(() => document.querySelector('input[type="text"]')?.focus(), 400) }}
             style={{ padding: '9px 18px', borderRadius: 999, fontSize: 13.5, fontWeight: 500, background: '#f4efe6', color: '#15110d', border: 0, cursor: 'pointer', boxShadow: '0 1px 0 rgba(255,255,255,0.4) inset, 0 6px 24px rgba(244,239,230,0.06)', transition: 'transform 0.15s' }}
@@ -395,15 +398,6 @@ export default function Screen1_Landing({ onSubmit, onRunFreeTier, error, onLogo
                   <option key={m.value} value={m.value} style={{ background: '#100e0b', color: '#f4efe6' }}>{m.label}</option>
                 ))}
               </select>
-              <button onClick={() => {
-                if (!input.trim()) {
-                  document.querySelector('input[type="text"]')?.focus()
-                  return
-                }
-                if (onRunFreeTier) onRunFreeTier(input.trim())
-              }} style={{ flexShrink: 0, height: 50, padding: '0 20px', borderRadius: 999, background: 'rgba(255,42,50,0.1)', color: '#ffb6b9', border: '1px solid rgba(255,42,50,0.3)', fontWeight: 500, fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', transition: 'background 0.2s' }}>
-                <span>Live Demo</span>
-              </button>
               <button onClick={handleSubmit} style={{ flexShrink: 0, height: 50, padding: '0 24px', borderRadius: 999, background: '#f4efe6', color: '#15110d', fontWeight: 500, fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 8, border: 0, cursor: 'pointer', boxShadow: '0 6px 18px rgba(244,239,230,0.10), 0 1px 0 rgba(255,255,255,0.5) inset', transition: 'transform 0.15s' }}>
                 <span>Scan</span><span>→</span>
               </button>
@@ -480,8 +474,8 @@ export default function Screen1_Landing({ onSubmit, onRunFreeTier, error, onLogo
                 if (!input.trim()) {
                   scrollTo('hero')
                   setTimeout(() => document.querySelector('input[type="text"]')?.focus(), 400)
-                } else if (onRunFreeTier) {
-                  onRunFreeTier(input.trim())
+                } else {
+                  handleSubmit()
                 }
               }}
             />

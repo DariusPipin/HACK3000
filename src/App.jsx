@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import Screen1_Landing from './screens/Screen1_Landing'
-import Screen2_Report from './screens/Screen2_Report'
-import Screen3_Pack from './screens/Screen3_Pack'
+import Screen_Scan from './screens/Screen_Scan'
 import LoginScreen from './screens/LoginScreen'
 import SignupScreen from './screens/SignupScreen'
-import Screen_FreeTier from './screens/Screen_FreeTier'
-import LoadingAnimation from './components/LoadingAnimation'
 import { callClaude } from './api/claude'
 import { buildPrompt1 } from './prompts/prompt1_analyzer'
 import { buildPrompt2 } from './prompts/prompt2_queries'
@@ -25,7 +22,7 @@ const ENTITY_PLATFORMS = [
 ]
 
 export default function App() {
-  const [screen, setScreen] = useState('login') // login | signup | landing | loading | report | pack | freetier
+  const [screen, setScreen] = useState('landing') // login | signup | landing | scan
   const [session, setSession] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [authMessage, setAuthMessage] = useState(null)
@@ -40,12 +37,10 @@ export default function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
-      if (session) setScreen('landing')
       setAuthLoading(false)
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
-      if (!session) setScreen('login')
     })
     return () => subscription.unsubscribe()
   }, [])
@@ -54,15 +49,17 @@ export default function App() {
     await supabase.auth.signOut()
   }
 
-  const runAnalysis = async (input, country = null) => {
-    setScreen('loading')
+  const runScan = async (input, country = null) => {
+    setTargetUrl(input)
+    setScreen('scan')
+    setReportData(null)
+    setContentPack(null)
     setLoadingStep(0)
     setError(null)
     setSelectedCountry(country || null)
 
     try {
-      // Step 1 — Company Intelligence (with live web context from Serper)
-      setLoadingStep(0)
+      // Step 1 — Company Intelligence
       const webContext = await searchWeb(input)
       const raw1 = await callClaude(buildPrompt1(input, country, webContext))
       const profile = parseJSON(raw1)
@@ -77,10 +74,9 @@ export default function App() {
 
       const companyNameForScoring = profile.company_name || input
 
-      // Step 3 — Live AI Queries + Web Search + Entity checks + Comparison articles (all parallel)
+      // Step 3 — Live AI Queries + Web Search + Entity checks + Comparison articles
       setLoadingStep(2)
       const [liveAnswers, webResults, entityPresence, comparisonResults] = await Promise.all([
-        // 10 live Claude answers
         Promise.all(
           queries.map(async (q) => {
             try {
@@ -94,21 +90,18 @@ export default function App() {
             }
           })
         ),
-        // 10 Serper web searches for query scoring
         Promise.all(
           queries.map(async (q) => {
             const results = await searchWeb(q.query, country)
             return { query: q.query, results }
           })
         ),
-        // 6 entity platform checks via site: search
         Promise.all(
           ENTITY_PLATFORMS.map(async ({ name, domain }) => {
             const results = await searchWeb(`"${companyNameForScoring}" site:${domain}`)
             return { name, present: !!(results && results.length > 0) }
           })
         ),
-        // 2 comparison article searches
         (async () => {
           const category = profile.primary_category || profile.industry || ''
           const [r1, r2] = await Promise.all([
@@ -117,7 +110,6 @@ export default function App() {
           ])
           const combined = [...(r1 || []), ...(r2 || [])]
           const name = companyNameForScoring.toLowerCase()
-          // Return articles where company is NOT mentioned (the gap)
           return combined
             .filter(r => !`${r.title || ''} ${r.snippet || ''} ${r.link || ''}`.toLowerCase().includes(name))
             .slice(0, 5)
@@ -136,7 +128,6 @@ export default function App() {
       const gaps = parseJSON(raw3)
       if (!gaps) throw new Error('Could not parse gap analysis')
 
-      // Merge web scores into query_results
       if (gaps.query_results) {
         gaps.query_results = gaps.query_results.map((r, i) => ({
           ...r,
@@ -144,7 +135,6 @@ export default function App() {
         }))
       }
 
-      // Combined score: LLM 65% + Web 35% (per Semrush 65/35 research)
       const webStrongCount = webScores.filter(s => s.web_strength === 'strong').length
       const webWeakCount = webScores.filter(s => s.web_strength === 'weak').length
       const webScore = webScores.length > 0
@@ -156,7 +146,6 @@ export default function App() {
         ? Math.round(llmScore * 0.65 + webScore * 0.35)
         : llmScore
 
-      // Combined strength per query
       const strengthVal = { strong: 2, weak: 1, none: 0 }
       const strengthLabel = (v) => v >= 1.5 ? 'strong' : v >= 0.6 ? 'weak' : 'none'
 
@@ -168,19 +157,15 @@ export default function App() {
         })
       }
 
-      // Attach entity presence and comparison articles to gaps for report display
       gaps.entity_presence = entityPresence
       gaps.comparison_articles = comparisonResults
 
-      setReportData({ profile, queries, gaps })
+      setReportData({ profile, queries, gaps, liveAnswers })
 
       // Step 5 — Content Pack
       setLoadingStep(4)
       const raw4 = await callClaude(buildPrompt4(profile, gaps, country, comparisonResults), 6000)
-      const pack = parseContentPack(raw4)
-      setContentPack(pack)
-
-      setScreen('report')
+      setContentPack(parseContentPack(raw4))
 
     } catch (err) {
       console.error('Analysis error:', err)
@@ -194,16 +179,10 @@ export default function App() {
     setReportData(null)
     setContentPack(null)
     setCompanyName('')
+    setTargetUrl('')
     setLoadingStep(0)
     setError(null)
   }
-
-  const runFreeAnalysis = (url) => {
-    setTargetUrl(url)
-    setScreen('freetier')
-  }
-
-  if (authLoading) return null
 
   if (screen === 'signup') {
     return (
@@ -225,35 +204,22 @@ export default function App() {
   }
 
   if (screen === 'landing') {
-    return <Screen1_Landing onSubmit={runAnalysis} onRunFreeTier={runFreeAnalysis} error={error} onLogout={handleLogout} />
+    return <Screen1_Landing onSubmit={runScan} error={error} onLogout={handleLogout} session={session} onGoToLogin={() => setScreen('login')} />
   }
 
-  if (screen === 'loading') {
-    return <LoadingAnimation currentStep={loadingStep} country={selectedCountry} />
-  }
-
-  if (screen === 'report') {
+  if (screen === 'scan') {
     return (
-      <Screen2_Report
-        reportData={reportData}
-        onViewPack={() => setScreen('pack')}
-        onNewScan={resetToLanding}
-      />
-    )
-  }
-
-  if (screen === 'pack') {
-    return (
-      <Screen3_Pack
-        pack={contentPack}
+      <Screen_Scan
+        url={targetUrl}
         companyName={companyName}
-        onBack={() => setScreen('report')}
+        reportData={reportData}
+        contentPack={contentPack}
+        loadingStep={loadingStep}
+        session={session}
+        onBack={resetToLanding}
+        onGoToSignup={() => setScreen('signup')}
       />
     )
-  }
-
-  if (screen === 'freetier') {
-    return <Screen_FreeTier url={targetUrl} onBack={() => setScreen('landing')} />
   }
 
   return null
