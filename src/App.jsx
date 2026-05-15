@@ -4,6 +4,7 @@ import Screen2_Report from './screens/Screen2_Report'
 import Screen3_Pack from './screens/Screen3_Pack'
 import LoginScreen from './screens/LoginScreen'
 import SignupScreen from './screens/SignupScreen'
+import Screen_FreeTier from './screens/Screen_FreeTier'
 import LoadingAnimation from './components/LoadingAnimation'
 import { callClaude } from './api/claude'
 import { buildPrompt1 } from './prompts/prompt1_analyzer'
@@ -24,7 +25,7 @@ const ENTITY_PLATFORMS = [
 ]
 
 export default function App() {
-  const [screen, setScreen] = useState('login') // login | signup | landing | loading | report | pack
+  const [screen, setScreen] = useState('login') // login | signup | landing | loading | report | pack | freetier
   const [session, setSession] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [authMessage, setAuthMessage] = useState(null)
@@ -34,6 +35,7 @@ export default function App() {
   const [companyName, setCompanyName] = useState('')
   const [error, setError] = useState(null)
   const [selectedCountry, setSelectedCountry] = useState(null)
+  const [targetUrl, setTargetUrl] = useState('')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -196,6 +198,11 @@ export default function App() {
     setError(null)
   }
 
+  const runFreeAnalysis = (url) => {
+    setTargetUrl(url)
+    setScreen('freetier')
+  }
+
   if (authLoading) return null
 
   if (screen === 'signup') {
@@ -218,7 +225,7 @@ export default function App() {
   }
 
   if (screen === 'landing') {
-    return <Screen1_Landing onSubmit={runAnalysis} error={error} onLogout={handleLogout} />
+    return <Screen1_Landing onSubmit={runAnalysis} onRunFreeTier={runFreeAnalysis} error={error} onLogout={handleLogout} />
   }
 
   if (screen === 'loading') {
@@ -243,6 +250,10 @@ export default function App() {
         onBack={() => setScreen('report')}
       />
     )
+  }
+
+  if (screen === 'freetier') {
+    return <Screen_FreeTier url={targetUrl} onBack={() => setScreen('landing')} />
   }
 
   return null
