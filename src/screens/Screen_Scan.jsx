@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
-async function saveLead(email, url) {
-  try {
-    await supabase.from('leads').insert({ email, scanned_url: url })
-  } catch (_) {}
+async function saveLead(email, scanned_url) {
+  const { error } = await supabase.from('leads').insert({ email, scanned_url })
+  if (error) console.error('Lead save failed:', error.message)
 }
 
 const LOADING_STEPS = [
